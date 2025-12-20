@@ -77,4 +77,4 @@ Run Database Seed
 docker exec lpg_app php artisan db:seed
 
 Clear Cache
-docker exec lpg_app php artisan cache:clear && docker exec lpg_app php artisan config:clear
+docker exec lpg_app php artisan cache:clear && docker exec lpg_app php artisan config:clear# Updated
