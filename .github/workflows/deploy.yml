@@ -69,18 +69,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add host key to known_hosts
         run: |
           mkdir -p ~/.ssh
-          cat > ~/.ssh/deploy_key << 'EOF'
-          ${{ secrets.DEPLOY_SSH_KEY }}
-          EOF
-          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Deploy to remote server
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
+          ssh -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
           set -e
           
           echo "🚀 Starting deployment..."
@@ -133,7 +134,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
+          ssh -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
           echo "🔍 Verifying deployment..."
           cd ${{ env.DEPLOY_DIR }}
           
@@ -150,7 +151,8 @@ jobs:
 
       - name: Cleanup SSH key
         if: always()
-        run: rm -f ~/.ssh/deploy_key
+        run: |
+          rm -f ~/.ssh/known_hosts || true
 
       - name: Notify success
         if: success()
