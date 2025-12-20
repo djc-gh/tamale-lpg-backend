@@ -15,6 +15,7 @@ services:
       - APP_ENV=${APP_ENV:-production}
       - APP_DEBUG=${APP_DEBUG:-false}
     volumes:
+      - ./.env:/var/www/.env:ro
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
     networks:
