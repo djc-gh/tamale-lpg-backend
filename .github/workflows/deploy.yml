@@ -93,6 +93,9 @@ jobs:
           echo "📦 Pulling latest code from repository..."
           git pull origin main
           
+          # Remove duplicate docker-compose file if exists
+          rm -f docker-compose.yml
+          
           # Login to GitHub Container Registry
           echo "🐳 Logging in to GitHub Container Registry..."
           echo "${{ github.token }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
