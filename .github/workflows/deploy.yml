@@ -96,6 +96,18 @@ jobs:
           # Remove duplicate docker-compose file if exists
           rm -f docker-compose.yml
           
+          # Check if .env exists
+          if [ ! -f .env ]; then
+            echo "❌ ERROR: .env file not found!"
+            echo "Please create .env file in ${{ env.DEPLOY_DIR }} with database credentials"
+            exit 1
+          fi
+          
+          # Create required directories with proper permissions
+          echo "📁 Setting up directories..."
+          mkdir -p storage/logs storage/framework/{sessions,views,cache} bootstrap/cache
+          chmod -R 777 storage bootstrap/cache
+          
           # Login to GitHub Container Registry
           echo "🐳 Logging in to GitHub Container Registry..."
           echo "${{ github.token }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
@@ -114,6 +126,10 @@ jobs:
           # Start new containers
           echo "🚀 Starting new containers..."
           docker compose up -d
+          
+          # Wait for app to be healthy
+          echo "⏳ Waiting for application to be ready..."
+          sleep 10
           
           # Run migrations
           echo "🔄 Running database migrations..."
