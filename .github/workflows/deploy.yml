@@ -33,7 +33,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Extract metadata
         id: meta
@@ -92,7 +92,7 @@ jobs:
           
           # Login to GitHub Container Registry
           echo "🐳 Logging in to GitHub Container Registry..."
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
+          echo "${{ github.token }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
           
           # Pull latest image
           echo "📥 Pulling Docker image..."

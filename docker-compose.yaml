@@ -1,14 +1,10 @@
 services:
   # PHP Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: laravel-app
+    image: ${DOCKER_IMAGE:-laravel-app}
     container_name: lpg_app
     restart: unless-stopped
     working_dir: /var/www
-    # Add these lines:
     environment:
       - HOME=/var/www/storage
       - DB_HOST=db
@@ -16,10 +12,22 @@ services:
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
     volumes:
-      - ./:/var/www
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
     networks:
       - lpg-network
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/index.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Nginx Web Server
   nginx:
@@ -27,12 +35,22 @@ services:
     container_name: lpg_nginx
     restart: unless-stopped
     ports:
-      - "8001:80"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
+      - ./public:/var/www/public:ro
+      - ./docker-compose/nginx:/etc/nginx/conf.d/:ro
     networks:
       - lpg-network
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Database (MySQL)
   db:
@@ -44,10 +62,23 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ROOT_HOST: '%'
     ports:
-      - "7053:3306"
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
     networks:
       - lpg-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USERNAME}", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  db_data:
+    driver: local
 
 networks:
   lpg-network:
