@@ -1,0 +1,27 @@
+services:
+
+  db:
+
+    # Use postgis image (includes postgres + spatial tools)
+
+    image: postgis/postgis:15-3.4
+
+    container_name: lpg_tamale_db
+
+    environment:
+
+      - POSTGRES_USER=laravel_user
+
+      - POSTGRES_PASSWORD=P@$$w@rd123
+
+      - POSTGRES_DB=lpg_tamale
+
+    ports:
+
+      - "7034:5432"
+
+    volumes:
+
+      - /var/DOCKER/DATA/postgres/lpg_tamale:/var/lib/postgresql/data
+
+    restart: unless-stopped

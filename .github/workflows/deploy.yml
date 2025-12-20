@@ -1,0 +1,164 @@
+name: Build & Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+  REMOTE_USER: ${{ secrets.REMOTE_USER }}
+  REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+  DEPLOY_DIR: '/var/DOCKER/lpg-backend'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sem}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Save image tag for deployment
+        run: echo "IMAGE_TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+        id: image
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to remote server
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
+          set -e
+          
+          echo "🚀 Starting deployment..."
+          
+          # Navigate to deploy directory
+          cd ${{ env.DEPLOY_DIR }}
+          
+          # Pull latest code
+          echo "📦 Pulling latest code from repository..."
+          git pull origin main
+          
+          # Login to GitHub Container Registry
+          echo "🐳 Logging in to GitHub Container Registry..."
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
+          
+          # Pull latest image
+          echo "📥 Pulling Docker image..."
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
+          # Stop and remove old containers
+          echo "🛑 Stopping old containers..."
+          docker-compose down || true
+          
+          # Update docker-compose with new image tag
+          sed -i 's|image: laravel-app|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest|g' docker-compose.yaml
+          
+          # Start new containers
+          echo "🚀 Starting new containers..."
+          docker-compose up -d
+          
+          # Run migrations
+          echo "🔄 Running database migrations..."
+          docker-compose exec -T app php artisan migrate --force
+          
+          # Clear caches
+          echo "🧹 Clearing caches..."
+          docker-compose exec -T app php artisan cache:clear
+          docker-compose exec -T app php artisan config:clear
+          docker-compose exec -T app php artisan view:clear
+          
+          # Set proper permissions
+          echo "🔐 Setting permissions..."
+          docker-compose exec -T app chown -R www-data:www-data /var/www/storage
+          
+          # Logout from GitHub Container Registry
+          docker logout ${{ env.REGISTRY }}
+          
+          echo "✅ Deployment completed successfully!"
+          EOF
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ env.REMOTE_PORT }} ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} << 'EOF'
+          echo "🔍 Verifying deployment..."
+          cd ${{ env.DEPLOY_DIR }}
+          
+          # Check container status
+          echo "Container Status:"
+          docker-compose ps
+          
+          # Check if app is healthy
+          echo "Checking application health..."
+          docker-compose exec -T app php artisan tinker --execute="echo 'Application is healthy!';"
+          
+          echo "✅ Verification complete!"
+          EOF
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Image: ghcr.io/${{ github.repository }}:latest"
+          echo "Server: ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          exit 1

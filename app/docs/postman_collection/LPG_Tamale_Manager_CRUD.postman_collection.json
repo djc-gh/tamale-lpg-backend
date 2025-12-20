@@ -1,0 +1,164 @@
+{
+  "info": {
+    "_postman_id": "manager-crud-collection",
+    "name": "LPG Tamale - Station Manager CRUD",
+    "description": "Complete API collection for managing station managers with full CRUD operations, assignment status tracking, and soft deletion",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. List All Managers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8001/api/managers?per_page=15",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "managers"],
+          "query": [
+            {
+              "key": "per_page",
+              "value": "15",
+              "disabled": false
+            },
+            {
+              "key": "is_active",
+              "value": "true",
+              "disabled": true
+            },
+            {
+              "key": "search",
+              "value": "",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Retrieve a paginated list of all station managers with their assignment status.\n\n**Authorization:** Admin only\n\n**Query Parameters:**\n- `per_page` (optional): Number of records per page (default: 15)\n- `is_active` (optional): Filter by active status (true/false)\n- `search` (optional): Search by name or email\n\n**Returns:** \nList with each manager including:\n- Basic info (id, name, email, is_active)\n- Assignment status (is_assigned, station_id, station_name, assigned_at, assigned_by)"
+      }
+    },
+    {
+      "name": "2. Create New Manager",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"New Manager Name\",\n  \"email\": \"newmanager@lpgtamale.com\",\n  \"password\": \"SecurePassword123\",\n  \"is_active\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/api/managers",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "managers"]
+        },
+        "description": "Create a new station manager with login credentials.\n\n**Authorization:** Admin only\n\n**Required Fields:**\n- `name`: Manager's full name\n- `email`: Unique email address\n- `password`: Minimum 8 characters\n- `is_active`: Boolean (default: true)\n\n**Returns:** 201 Created with new manager details"
+      }
+    },
+    {
+      "name": "3. Get Manager Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8001/api/managers/{{manager_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "managers", "{{manager_id}}"]
+        },
+        "description": "Retrieve detailed information about a specific station manager.\n\n**Authorization:** Admin only\n\n**URL Parameters:**\n- `manager_id`: ID of the manager to retrieve\n\n**Returns:**\nManager details including:\n- Full user information\n- Active assignment status with station name\n- List of all managed stations\n- Complete assignment history"
+      }
+    },
+    {
+      "name": "4. Update Manager Information",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Manager Name\",\n  \"email\": \"updated@lpgtamale.com\",\n  \"password\": \"NewPassword123\",\n  \"is_active\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/api/managers/{{manager_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "managers", "{{manager_id}}"]
+        },
+        "description": "Update manager's information (any field is optional).\n\n**Authorization:** Admin only\n\n**Optional Fields:**\n- `name`: Manager's full name\n- `email`: Email address (must be unique unless it's the current email)\n- `password`: New password (minimum 8 characters)\n- `is_active`: Boolean status\n\n**Returns:** 200 OK with updated manager details"
+      }
+    },
+    {
+      "name": "5. Deactivate Manager (Soft Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8001/api/managers/{{manager_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "managers", "{{manager_id}}"]
+        },
+        "description": "Soft delete a manager by deactivating their account.\n\n**Authorization:** Admin only\n\n**Business Rules:**\n- Cannot delete manager with active station assignment\n- Must remove from station first before deactivating\n- Sets `is_active` to false (records remain in database)\n- Manager login will be disabled\n\n**URL Parameters:**\n- `manager_id`: ID of the manager to deactivate\n\n**Returns:** 200 OK with deactivated manager details\n\n**Error Responses:**\n- 422: If manager has active station assignment"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Admin bearer token (obtained from /api/auth/login)"
+    },
+    {
+      "key": "manager_id",
+      "value": "3",
+      "type": "string",
+      "description": "ID of the station manager to operate on"
+    }
+  ]
+}

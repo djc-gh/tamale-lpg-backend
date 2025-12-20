@@ -1,0 +1,662 @@
+{
+  "info": {
+    "_postman_id": "lpg-tamale-api-v1",
+    "name": "LPG Tamale API",
+    "description": "Complete API collection for LPG Tamale Backend - Testing all endpoints with pre-configured requests for authentication, stations, and authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication endpoints - Register and login",
+      "item": [
+        {
+          "name": "Register - Station Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Central Station Manager\",\n  \"email\": \"central.manager@tamalelpg.com\",\n  \"password\": \"SecurePassword123!\",\n  \"password_confirmation\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new station manager account. All public registrations default to 'station' role."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Station Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"central.manager@tamalelpg.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with station manager credentials. Returns user info with token.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "  var jsonData = pm.response.json();",
+                    "  pm.environment.set('token', jsonData.token);",
+                    "  pm.environment.set('current_user_id', jsonData.user.id);",
+                    "  pm.environment.set('current_user_role', jsonData.user.role);",
+                    "  pm.environment.set('current_station_id', jsonData.user.station_id);",
+                    "  console.log('✅ Logged in as: ' + jsonData.user.name + ' (Role: ' + jsonData.user.role + ')');",
+                    "} else {",
+                    "  console.log('❌ Login failed');",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@tamalelpg.com\",\n  \"password\": \"AdminPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with admin credentials. Returns user info with token.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "  var jsonData = pm.response.json();",
+                    "  pm.environment.set('admin_token', jsonData.token);",
+                    "  pm.environment.set('admin_user_id', jsonData.user.id);",
+                    "  console.log('✅ Logged in as ADMIN: ' + jsonData.user.name);",
+                    "} else {",
+                    "  console.log('❌ Admin login failed');",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get current authenticated user information including role and station_id"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Refresh the authentication token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout and revoke current token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stations - Public",
+      "description": "Public station endpoints - No authentication required",
+      "item": [
+        {
+          "name": "List All Stations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/stations?per_page=10&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "List all LPG stations with pagination. Public access - no auth required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Station by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}"
+              ]
+            },
+            "description": "Get detailed information for a specific station. Use station_id from list."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Nearby Stations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"radius\": 5,\n  \"available_only\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/nearby",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "nearby"
+              ]
+            },
+            "description": "Find stations within a specified radius (km) of given coordinates. Returns stations with distance_km."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Station Price History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}/price-history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}",
+                "price-history"
+              ]
+            },
+            "description": "Get price history for a specific station"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stations - Admin Only",
+      "description": "Admin endpoints for station management - Create, Update, Delete",
+      "item": [
+        {
+          "name": "Create Station (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"West End Gas Station\",\n  \"address\": \"West End, Tamale\",\n  \"phone\": \"+233200123456\",\n  \"email\": \"westend@tamalelpg.com\",\n  \"latitude\": 9.3875,\n  \"longitude\": -0.8500,\n  \"operating_hours\": \"6:00 AM - 10:00 PM\",\n  \"price_per_kg\": 3.75,\n  \"is_available\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations"
+              ]
+            },
+            "description": "Create a new LPG station. Admin only. Returns 403 if not admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Station (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Central Station Updated\",\n  \"price_per_kg\": 3.80,\n  \"operating_hours\": \"5:00 AM - 11:00 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}"
+              ]
+            },
+            "description": "Update station details. Admin only. All fields are optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Station (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}"
+              ]
+            },
+            "description": "Delete a station. Admin only. Returns 204 No Content on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stations - Availability Management",
+      "description": "Toggle station availability - Admins can update any, Managers only their own",
+      "item": [
+        {
+          "name": "Toggle Availability - Admin (Any Station)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_available\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}",
+                "availability"
+              ]
+            },
+            "description": "Admin can toggle availability for ANY station in the system."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Availability - Manager (Own Station)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_available\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{current_station_id}}/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{current_station_id}}",
+                "availability"
+              ]
+            },
+            "description": "Station manager can toggle availability for their assigned station only. Using {{current_station_id}} from login response."
+          },
+          "response": []
+        },
+        {
+          "name": "Try to Toggle Other Station (Manager - Should Fail)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_available\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{other_station_id}}/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{other_station_id}}",
+                "availability"
+              ]
+            },
+            "description": "Test authorization - Station manager trying to toggle a different station's availability. Should return 403 Unauthorized."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authorization Tests",
+      "description": "Test endpoints to verify role-based access control",
+      "item": [
+        {
+          "name": "Try to Create Station as Manager (Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Station\",\n  \"address\": \"Test Address\",\n  \"phone\": \"+233200000000\",\n  \"email\": \"test@tamalelpg.com\",\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"operating_hours\": \"6:00 AM - 8:00 PM\",\n  \"price_per_kg\": 3.50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations"
+              ]
+            },
+            "description": "Test: Station manager trying to create a station. Should return 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "Try to Delete Station as Manager (Should Fail)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/stations/{{station_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stations",
+                "{{station_id}}"
+              ]
+            },
+            "description": "Test: Station manager trying to delete a station. Should return 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "Try to Access Protected Route Without Token (Should Fail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Test: Accessing protected route without authentication token. Should return 401 Unauthorized."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8001",
+      "type": "string",
+      "description": "API base URL - Change to your server URL"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Station Manager authentication token (set by Login - Station Manager request)"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Admin authentication token (set by Login - Admin request)"
+    },
+    {
+      "key": "station_id",
+      "value": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "string",
+      "description": "Replace with an actual station ID from List All Stations response"
+    },
+    {
+      "key": "current_user_id",
+      "value": "",
+      "type": "string",
+      "description": "Current logged-in user ID (set by login requests)"
+    },
+    {
+      "key": "current_user_role",
+      "value": "",
+      "type": "string",
+      "description": "Current logged-in user's role (admin or station)"
+    },
+    {
+      "key": "current_station_id",
+      "value": "",
+      "type": "string",
+      "description": "Current user's assigned station (for station managers)"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "",
+      "type": "string",
+      "description": "Admin user ID (set by Login - Admin request)"
+    },
+    {
+      "key": "other_station_id",
+      "value": "550e8400-e29b-41d4-a716-446655440001",
+      "type": "string",
+      "description": "A different station ID (for testing unauthorized access)"
+    }
+  ]
+}

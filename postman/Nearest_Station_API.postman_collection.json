@@ -1,0 +1,132 @@
+{
+  "info": {
+    "name": "LPG Tamale - Nearest Station API",
+    "description": "API for finding the nearest available LPG stations based on user's geolocation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Nearby Stations",
+      "item": [
+        {
+          "name": "Find Nearest Available Stations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"radius\": 10,\n  \"available_only\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/nearby",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations", "nearby"]
+            },
+            "description": "Find LPG stations nearest to user's location with smart sorting (available first, then by distance)"
+          },
+          "response": []
+        },
+        {
+          "name": "Find Only Available Stations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"radius\": 10,\n  \"available_only\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/nearby",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations", "nearby"]
+            },
+            "description": "Find only available LPG stations"
+          },
+          "response": []
+        },
+        {
+          "name": "Find Nearby Stations (Small Radius)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"radius\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/nearby",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations", "nearby"]
+            },
+            "description": "Find stations within 5km radius"
+          },
+          "response": []
+        },
+        {
+          "name": "Find Nearby Stations (Large Radius)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 9.4034,\n  \"longitude\": -0.8424,\n  \"radius\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/stations/nearby",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations", "nearby"]
+            },
+            "description": "Find stations within 50km radius"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test Data",
+      "item": [
+        {
+          "name": "Get All Stations (Raw Data)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/stations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations"]
+            },
+            "description": "Get all stations with coordinates for testing"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8001",
+      "type": "string"
+    }
+  ]
+}

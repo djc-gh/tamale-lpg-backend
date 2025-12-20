@@ -1,0 +1,638 @@
+{
+  "info": {
+    "name": "LPG Tamale - Analytics & Visitor Tracking",
+    "description": "Visitor tracking and analytics endpoints. All endpoints require admin authentication.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Analytics Overview",
+      "description": "Quick dashboard snapshot with key metrics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/overview?days=30",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "overview"
+          ],
+          "query": [
+            {
+              "key": "days",
+              "value": "30",
+              "description": "Number of days to analyze (default: 30, max: 365)"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/overview?days=30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Analytics overview retrieved successfully\",\n  \"period\": {\n    \"start_date\": \"2025-11-20\",\n    \"end_date\": \"2025-12-20\",\n    \"days\": \"30\"\n  },\n  \"data\": {\n    \"total_visits\": 9,\n    \"total_unique_visitors\": 1,\n    \"avg_visits_per_day\": 0.3,\n    \"device_distribution\": [\n      {\n        \"device_type\": \"desktop\",\n        \"visits\": 9,\n        \"unique_visitors\": 1\n      }\n    ],\n    \"top_pages\": [\n      {\n        \"url\": \"/api/stations\",\n        \"visits\": 8,\n        \"unique_visitors\": 1\n      }\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Daily Statistics",
+      "description": "Get daily visit statistics for a date range",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/daily?start_date=2025-12-20&end_date=2025-12-21",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "daily"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2025-12-20",
+              "description": "Start date (YYYY-MM-DD format)"
+            },
+            {
+              "key": "end_date",
+              "value": "2025-12-21",
+              "description": "End date (YYYY-MM-DD format)"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/daily?start_date=2025-12-20&end_date=2025-12-21",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "daily"
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2025-12-20"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2025-12-21"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Daily statistics retrieved successfully\",\n  \"period\": {\n    \"start_date\": \"2025-12-20\",\n    \"end_date\": \"2025-12-21\"\n  },\n  \"data\": [\n    {\n      \"date\": \"2025-12-20\",\n      \"total_visits\": 9,\n      \"unique_visitors\": 1\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Monthly Statistics",
+      "description": "Get monthly visit statistics for a date range",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/monthly?start_date=2025-01-01&end_date=2025-12-31",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "monthly"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2025-01-01",
+              "description": "Start date (YYYY-MM-DD format)"
+            },
+            {
+              "key": "end_date",
+              "value": "2025-12-31",
+              "description": "End date (YYYY-MM-DD format)"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/monthly?start_date=2025-01-01&end_date=2025-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2025-12-31"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Monthly statistics retrieved successfully\",\n  \"period\": {\n    \"start_date\": \"2025-01-01\",\n    \"end_date\": \"2025-12-31\"\n  },\n  \"data\": [\n    {\n      \"month\": \"2025-12\",\n      \"total_visits\": 9,\n      \"unique_visitors\": 1\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Top Pages",
+      "description": "Get the most visited pages",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/top-pages?limit=10",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "top-pages"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Number of pages to return (default: 10, max: 100)"
+            },
+            {
+              "key": "start_date",
+              "value": "",
+              "description": "Optional: Start date filter (YYYY-MM-DD format)",
+              "disabled": true
+            },
+            {
+              "key": "end_date",
+              "value": "",
+              "description": "Optional: End date filter (YYYY-MM-DD format)",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/top-pages?limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "top-pages"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Top pages retrieved successfully\",\n  \"limit\": 10,\n  \"data\": [\n    {\n      \"url\": \"/api/stations\",\n      \"visits\": 8,\n      \"unique_visitors\": 1\n    },\n    {\n      \"url\": \"/api/stations/019b396b-dd20-7120-bedb-858432d894c3\",\n      \"visits\": 1,\n      \"unique_visitors\": 1\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Device Distribution",
+      "description": "Get visitor device type distribution (mobile, tablet, desktop)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/devices",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "devices"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "",
+              "description": "Optional: Start date filter (YYYY-MM-DD format)",
+              "disabled": true
+            },
+            {
+              "key": "end_date",
+              "value": "",
+              "description": "Optional: End date filter (YYYY-MM-DD format)",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/devices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "devices"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Device distribution retrieved successfully\",\n  \"data\": [\n    {\n      \"device_type\": \"desktop\",\n      \"visits\": 9,\n      \"unique_visitors\": 1\n    },\n    {\n      \"device_type\": \"mobile\",\n      \"visits\": 3,\n      \"unique_visitors\": 2\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Browser Distribution",
+      "description": "Get visitor browser distribution (Chrome, Safari, Firefox, etc.)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/browsers",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "browsers"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "",
+              "description": "Optional: Start date filter (YYYY-MM-DD format)",
+              "disabled": true
+            },
+            {
+              "key": "end_date",
+              "value": "",
+              "description": "Optional: End date filter (YYYY-MM-DD format)",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/browsers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "browsers"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Browser distribution retrieved successfully\",\n  \"data\": [\n    {\n      \"browser\": \"Chrome\",\n      \"visits\": 7,\n      \"unique_visitors\": 2\n    },\n    {\n      \"browser\": \"Safari\",\n      \"visits\": 2,\n      \"unique_visitors\": 1\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Operating System Distribution",
+      "description": "Get visitor OS distribution (Windows, macOS, Linux, iOS, Android)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/operating-systems",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "operating-systems"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "",
+              "description": "Optional: Start date filter (YYYY-MM-DD format)",
+              "disabled": true
+            },
+            {
+              "key": "end_date",
+              "value": "",
+              "description": "Optional: End date filter (YYYY-MM-DD format)",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/operating-systems",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "operating-systems"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"OS distribution retrieved successfully\",\n  \"data\": [\n    {\n      \"os\": \"Windows\",\n      \"visits\": 6,\n      \"unique_visitors\": 2\n    },\n    {\n      \"os\": \"macOS\",\n      \"visits\": 3,\n      \"unique_visitors\": 1\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Returning vs New Visitors",
+      "description": "Compare new visitors vs returning visitors and calculate return rate",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/analytics/returning-vs-new?days=30",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "returning-vs-new"
+          ],
+          "query": [
+            {
+              "key": "days",
+              "value": "30",
+              "description": "Number of days to analyze (default: 30, max: 365)"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/returning-vs-new?days=30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "returning-vs-new"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [],
+          "body": "{\n  \"message\": \"Returning vs new visitors retrieved successfully\",\n  \"period\": {\n    \"start_date\": \"2025-11-20\",\n    \"end_date\": \"2025-12-20\",\n    \"days\": \"30\"\n  },\n  \"data\": {\n    \"new_visitors\": 2,\n    \"returning_visitors\": 1,\n    \"total_unique_visitors\": 3,\n    \"return_rate\": 33.33\n  }\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "YOUR_ADMIN_TOKEN_HERE",
+      "type": "string"
+    }
+  ]
+}

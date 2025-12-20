@@ -1,0 +1,54 @@
+services:
+  # PHP Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-app
+    container_name: lpg_app
+    restart: unless-stopped
+    working_dir: /var/www
+    # Add these lines:
+    environment:
+      - HOME=/var/www/storage
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./:/var/www
+    networks:
+      - lpg-network
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: lpg_nginx
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - lpg-network
+
+  # Database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: lpg-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    ports:
+      - "7053:3306"
+    networks:
+      - lpg-network
+
+networks:
+  lpg-network:
+    driver: bridge
