@@ -41,6 +41,7 @@ services:
     volumes:
       - ./public:/var/www/public:ro
       - ./docker-compose/nginx:/etc/nginx/conf.d/:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - lpg-network
     depends_on:
@@ -65,7 +66,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_ROOT_HOST: '%'
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:

@@ -20,7 +20,10 @@ WORKDIR /var/www
 COPY --chown=www-data:www-data . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --prefer-dist
+
+# Generate app key if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
 USER www-data
 

@@ -1,0 +1,4 @@
+$user = \App\Models\User::where('email', 'admin@lpg-tamale.com')->first();
+$user->password = \Illuminate\Support\Facades\Hash::make('admin123');
+$user->save();
+echo "Password updated to: admin123";
