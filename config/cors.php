@@ -5,13 +5,9 @@ return [
     
     'allowed_methods' => ['*'],
     
-    'allowed_origins' => [
-        'http://localhost:3000',
-        'http://192.168.1.141:3000',
-        'https://find-lpg.app',
-        'https://www.find-lpg.app',
-        'https://tamale-lpg.netlify.app'
-    ],
+    'allowed_origins' => array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 
+        'http://localhost:3000,http://192.168.1.141:3000,https://find-lpg.app,https://www.find-lpg.app,https://tamale-lpg.netlify.app'
+    )))),
     
     'allowed_origins_patterns' => [],
     

@@ -20,7 +20,12 @@ WORKDIR /var/www
 COPY --chown=www-data:www-data . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# Cache configuration for production
+RUN php artisan config:cache 2>/dev/null || true
+RUN php artisan route:cache 2>/dev/null || true
+RUN php artisan view:cache 2>/dev/null || true
 
 # Generate app key if not exists
 RUN if [ ! -f .env ]; then cp .env.example .env; fi

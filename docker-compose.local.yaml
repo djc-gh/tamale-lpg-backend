@@ -1,0 +1,96 @@
+services:
+  # PHP Application (Local Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: lpg_app_local
+    restart: unless-stopped
+    working_dir: /var/www
+    environment:
+      - HOME=/var/www/storage
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-lpg_tamale}
+      - DB_USERNAME=${DB_USERNAME:-lpg_user}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost
+    volumes:
+      - ./:/var/www
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+    networks:
+      - lpg-network-local
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+
+  # Nginx Web Server (Local Development)
+  nginx:
+    image: nginx:alpine
+    container_name: lpg_nginx_local
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8001:80"
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx/laravel.local.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - lpg-network-local
+    depends_on:
+      - app
+
+  # Database (MySQL) - Local Development
+  db:
+    image: mysql:8.0
+    container_name: lpg_db_local
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-lpg_tamale}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-lpg_user}
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data_local:/var/lib/mysql
+    networks:
+      - lpg-network-local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # PHPMyAdmin (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: lpg_phpmyadmin_local
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USERNAME:-lpg_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-secret}
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8081:80"
+    networks:
+      - lpg-network-local
+    depends_on:
+      - db
+
+volumes:
+  db_data_local:
+    driver: local
+
+networks:
+  lpg-network-local:
+    driver: bridge

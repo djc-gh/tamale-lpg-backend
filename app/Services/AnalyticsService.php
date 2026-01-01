@@ -13,7 +13,7 @@ class AnalyticsService
      */
     public function getTotalUniqueVisitors(?Carbon $startDate = null, ?Carbon $endDate = null): int
     {
-        $query = Visitor::select('ip_address')->distinct();
+        $query = Visitor::query();
 
         if ($startDate) {
             $query->where('created_at', '>=', $startDate);
@@ -22,7 +22,7 @@ class AnalyticsService
             $query->where('created_at', '<=', $endDate);
         }
 
-        return $query->count();
+        return $query->distinct('ip_address')->count('ip_address');
     }
 
     /**
