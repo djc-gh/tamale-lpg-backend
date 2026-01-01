@@ -26,7 +26,14 @@ class TrackVisitor
         $response = $next($request);
         $responseTime = (int) ((microtime(true) - $startTime) * 1000); // Convert to ms
 
-        // Track the visitor asynchronously (don't block the response)
+        // Check if this session has already been tracked
+        $sessionKey = 'visitor_tracked';
+        if ($request->session()->has($sessionKey)) {
+            // Already tracked this session, skip
+            return $response;
+        }
+
+        // Track the visitor (first time in this session)
         try {
             $userAgent = $request->userAgent() ?? '';
             $parser = new UserAgentParser($userAgent);
@@ -43,6 +50,9 @@ class TrackVisitor
                 'response_code' => $response->getStatusCode(),
                 'response_time_ms' => $responseTime,
             ]);
+
+            // Mark this session as tracked
+            $request->session()->put($sessionKey, true);
         } catch (\Exception $e) {
             // Silently fail - don't break the request
             \Log::warning('Visitor tracking failed: ' . $e->getMessage());
@@ -80,11 +90,12 @@ class TrackVisitor
      */
     private function shouldSkipTracking(Request $request): bool
     {
+        // Skip internal/utility endpoints
         $skipPaths = [
             'health',
             'up',
-            'api/auth',
             'storage',
+            'sanctum/csrf-cookie',
         ];
 
         foreach ($skipPaths as $path) {
