@@ -38,6 +38,12 @@ class TrackVisitor
             $userAgent = $request->userAgent() ?? '';
             $parser = new UserAgentParser($userAgent);
 
+            // Get authenticated user ID (must be integer or null)
+            $userId = null;
+            if ($request->user() && is_numeric($request->user()->id)) {
+                $userId = (int) $request->user()->id;
+            }
+
             Visitor::create([
                 'ip_address' => $this->getClientIp($request),
                 'url' => $request->getRequestUri(),
@@ -46,7 +52,7 @@ class TrackVisitor
                 'device_type' => $parser->getDeviceType(),
                 'browser' => $parser->getBrowser(),
                 'os' => $parser->getOs(),
-                'user_id' => $request->user()?->id,
+                'user_id' => $userId,
                 'response_code' => $response->getStatusCode(),
                 'response_time_ms' => $responseTime,
             ]);
