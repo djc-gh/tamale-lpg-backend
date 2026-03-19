@@ -133,14 +133,17 @@ jobs:
           
           # Stop and remove old containers
           echo "🛑 Stopping old containers..."
-          docker compose down || true
+          docker compose -f docker-compose.yaml down || true
           
           # Update docker-compose with new image tag
+          sed -i 's|image: ${DOCKER_IMAGE:-laravel-app}|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest|g' docker-compose.yaml
           sed -i 's|image: laravel-app|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest|g' docker-compose.yaml
           
           # Start new containers (PHP-FPM only - uses host Nginx & MySQL)
           echo "🚀 Starting PHP-FPM container..."
-          docker compose up -d
+          echo "Working directory: $(pwd)"
+          ls -la docker-compose.yaml
+          docker compose -f docker-compose.yaml up -d
           
           # Wait for app to be healthy
           echo "⏳ Waiting for application to be ready..."
@@ -148,17 +151,17 @@ jobs:
           
           # Run migrations against host MySQL
           echo "🔄 Running database migrations..."
-          docker compose exec -T app php artisan migrate --force
+          docker compose -f docker-compose.yaml exec -T app php artisan migrate --force
           
           # Clear caches
           echo "🧹 Clearing caches..."
-          docker compose exec -T app php artisan cache:clear
-          docker compose exec -T app php artisan config:clear
-          docker compose exec -T app php artisan view:clear
+          docker compose -f docker-compose.yaml exec -T app php artisan cache:clear
+          docker compose -f docker-compose.yaml exec -T app php artisan config:clear
+          docker compose -f docker-compose.yaml exec -T app php artisan view:clear
           
           # Set proper permissions
           echo "🔐 Setting permissions..."
-          docker compose exec -T app chown -R www-data:www-data /var/www/storage
+          docker compose -f docker-compose.yaml exec -T app chown -R www-data:www-data /var/www/storage
           
           # Setup host Nginx config if not already done
           if [ ! -f /etc/nginx/sites-available/lpg-backend ]; then
@@ -183,11 +186,11 @@ jobs:
           
           # Check container status
           echo "Container Status:"
-          docker compose ps
+          docker compose -f docker-compose.yaml ps
           
           # Check if app is healthy
           echo "Checking application health..."
-          docker compose exec -T app php artisan tinker --execute="echo 'Application is healthy!';"
+          docker compose -f docker-compose.yaml exec -T app php artisan tinker --execute="echo 'Application is healthy!';"
           
           echo "✅ Verification complete!"
           EOF
