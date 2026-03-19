@@ -26,9 +26,9 @@ class TrackVisitor
         $response = $next($request);
         $responseTime = (int) ((microtime(true) - $startTime) * 1000); // Convert to ms
 
-        // Check if this session has already been tracked
+        // Check if this session/request has already been tracked
         $sessionKey = 'visitor_tracked';
-        if ($request->session()->has($sessionKey)) {
+        if ($request->hasSession() && $request->session()->has($sessionKey)) {
             // Already tracked this session, skip
             return $response;
         }
@@ -57,8 +57,10 @@ class TrackVisitor
                 'response_time_ms' => $responseTime,
             ]);
 
-            // Mark this session as tracked
-            $request->session()->put($sessionKey, true);
+            // Mark this session as tracked (only if session is available)
+            if ($request->hasSession()) {
+                $request->session()->put($sessionKey, true);
+            }
         } catch (\Exception $e) {
             // Silently fail - don't break the request
             \Log::warning('Visitor tracking failed: ' . $e->getMessage());
