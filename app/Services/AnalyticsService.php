@@ -249,4 +249,51 @@ class AnalyticsService
             'return_rate' => $newVisitors + $returningVisitors > 0 ? round(($returningVisitors / ($newVisitors + $returningVisitors)) * 100, 2) : 0,
         ];
     }
+
+    /**
+     * Get search locations heatmap data for expansion planning
+     * Groups searches by location to identify high-demand areas
+     */
+    public function getSearchLocations(?Carbon $startDate = null, ?Carbon $endDate = null, $limit = 50): array
+    {
+        $startDate = $startDate ?? now()->subDays(30);
+        $endDate = $endDate ?? now();
+
+        // Import StationSearch model
+        $stationSearchModel = \App\Models\StationSearch::class;
+
+        // Get search locations grouped by approximate lat/lng (grid clustering)
+        $searches = $stationSearchModel::selectRaw('
+            ROUND(latitude, 2) as lat_cluster,
+            ROUND(longitude, 2) as lng_cluster,
+            COUNT(*) as search_count,
+            COUNT(DISTINCT user_id) as unique_users,
+            COUNT(DISTINCT client_ip) as unique_ips,
+            AVG(results_count) as avg_results,
+            MIN(created_at) as first_search,
+            MAX(created_at) as last_search
+        ')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('lat_cluster', 'lng_cluster')
+            ->orderByDesc('search_count')
+            ->limit($limit)
+            ->get()
+            ->toArray();
+
+        // Get total search statistics
+        $totalSearches = $stationSearchModel::whereBetween('created_at', [$startDate, $endDate])->count();
+        $uniqueLocations = $stationSearchModel::selectRaw('ROUND(latitude, 2), ROUND(longitude, 2)')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->distinct()
+            ->count();
+
+        return [
+            'total_searches' => $totalSearches,
+            'unique_locations' => $uniqueLocations,
+            'top_search_areas' => $searches,
+            'summary' => [
+                'avg_results_per_search' => round($totalSearches > 0 ? $stationSearchModel::whereBetween('created_at', [$startDate, $endDate])->avg('results_count') : 0, 2),
+            ],
+        ];
+    }
 }

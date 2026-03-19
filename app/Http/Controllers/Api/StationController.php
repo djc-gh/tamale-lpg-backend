@@ -144,11 +144,19 @@ class StationController extends Controller
             'available_only' => 'boolean',
         ]);
 
+        // Get user context
+        $userId = auth()->id();
+        $clientIp = $request->ip();
+        $userAgent = $request->userAgent();
+
         $stations = $this->stationService->getNearbyStations(
             $validated['latitude'],
             $validated['longitude'],
             $validated['radius'] ?? 5,
-            $validated['available_only'] ?? false
+            $validated['available_only'] ?? false,
+            $userId,
+            $clientIp,
+            $userAgent
         );
 
         // If no stations found

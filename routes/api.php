@@ -87,5 +87,6 @@ Route::middleware('auth.api:sanctum')->group(function () {
         Route::get('/browsers', [AnalyticsController::class, 'browserDistribution']);
         Route::get('/operating-systems', [AnalyticsController::class, 'osDistribution']);
         Route::get('/returning-vs-new', [AnalyticsController::class, 'returningVsNew']);
+        Route::get('/search-locations', [AnalyticsController::class, 'searchLocations']);
     });
 });

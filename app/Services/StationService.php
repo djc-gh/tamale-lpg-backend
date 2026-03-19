@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Station;
 use App\Models\StationAvailabilityLog;
 use App\Models\PriceHistory;
+use App\Models\StationSearch;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class StationService
@@ -140,14 +141,46 @@ class StationService
      * @param float $longitude User's longitude
      * @param int $radius Search radius in kilometers
      * @param bool $availableOnly Return only available stations
+     * @param ?string $userId User ID (from authenticated user)
+     * @param ?string $clientIp Client IP address
+     * @param ?string $userAgent Client user agent string
      * @return mixed
      */
-    public function getNearbyStations(float $latitude, float $longitude, int $radius = 5, bool $availableOnly = false): mixed
+    public function getNearbyStations(
+        float $latitude,
+        float $longitude,
+        int $radius = 5,
+        bool $availableOnly = false,
+        ?string $userId = null,
+        ?string $clientIp = null,
+        ?string $userAgent = null
+    ): mixed
     {
         $query = Station::withinRadius($latitude, $longitude, $radius);
 
         // Get all stations within radius
         $stations = $query->get();
+
+        // Log the search to station_searches table
+        try {
+            StationSearch::create([
+                'user_id' => $userId,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'radius_km' => $radius,
+                'available_only' => $availableOnly,
+                'client_ip' => $clientIp ?? '0.0.0.0',
+                'user_agent' => $userAgent,
+                'results_count' => $stations->count(),
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail if logging fails - don't break the main API
+            \Log::warning('Failed to log station search', [
+                'error' => $e->getMessage(),
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+            ]);
+        }
 
         if ($stations->isEmpty()) {
             return collect(); // Return empty collection if no stations found

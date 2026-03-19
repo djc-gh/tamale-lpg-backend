@@ -200,4 +200,32 @@ class AnalyticsController extends Controller
             'data' => $data,
         ]);
     }
+
+    /**
+     * Get station search locations for expansion planning
+     * Shows heatmap data of where users are searching for LPG stations
+     */
+    public function searchLocations(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'limit' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $startDate = isset($validated['start_date']) ? Carbon::parse($validated['start_date']) : null;
+        $endDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date']) : null;
+        $limit = $validated['limit'] ?? 50;
+
+        $data = $this->analyticsService->getSearchLocations($startDate, $endDate, $limit);
+
+        return response()->json([
+            'message' => 'Station search locations retrieved successfully',
+            'period' => [
+                'start_date' => ($startDate ?? now()->subDays(30))->toDateString(),
+                'end_date' => ($endDate ?? now())->toDateString(),
+            ],
+            'data' => $data,
+        ]);
+    }
 }
