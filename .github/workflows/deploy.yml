@@ -86,12 +86,19 @@ jobs:
           
           echo "🚀 Starting deployment..."
           
-          # Navigate to deploy directory
+          # Create deploy directory if it doesn't exist
+          mkdir -p ${{ env.DEPLOY_DIR }}
           cd ${{ env.DEPLOY_DIR }}
           
-          # Pull latest code
-          echo "📦 Pulling latest code from repository..."
-          git pull origin main
+          # Initialize git repo if it doesn't exist
+          echo "📦 Preparing repository..."
+          if [ ! -d .git ]; then
+            echo "Cloning repository..."
+            git clone https://github.com/${{ github.repository }}.git .
+          else
+            echo "Updating repository..."
+            git pull origin main
+          fi
           
           # Remove duplicate docker-compose file if exists
           rm -f docker-compose.yml
