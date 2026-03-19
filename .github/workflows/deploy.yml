@@ -135,15 +135,15 @@ jobs:
           # Update docker-compose with new image tag
           sed -i 's|image: laravel-app|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest|g' docker-compose.yaml
           
-          # Start new containers
-          echo "🚀 Starting new containers..."
+          # Start new containers (PHP-FPM only - uses host Nginx & MySQL)
+          echo "🚀 Starting PHP-FPM container..."
           docker compose up -d
           
           # Wait for app to be healthy
           echo "⏳ Waiting for application to be ready..."
           sleep 10
           
-          # Run migrations
+          # Run migrations against host MySQL
           echo "🔄 Running database migrations..."
           docker compose exec -T app php artisan migrate --force
           
@@ -156,6 +156,15 @@ jobs:
           # Set proper permissions
           echo "🔐 Setting permissions..."
           docker compose exec -T app chown -R www-data:www-data /var/www/storage
+          
+          # Setup host Nginx config if not already done
+          if [ ! -f /etc/nginx/sites-available/lpg-backend ]; then
+            echo "📋 Installing Nginx config (first-time setup)..."
+            cp docker-compose/nginx/lpg-backend.host.conf /etc/nginx/sites-available/lpg-backend
+            ln -sf /etc/nginx/sites-available/lpg-backend /etc/nginx/sites-enabled/
+            nginx -t && systemctl reload nginx
+            echo "✅ Nginx configured!"
+          fi
           
           # Logout from GitHub Container Registry
           docker logout ${{ env.REGISTRY }}
